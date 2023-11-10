@@ -13,9 +13,6 @@ for i = 1:length(resampled_sounds)
 
     n = length(x);  % num samples
     f = (0:n-1)*(fs/n);  % frequency range
-    %{
-    The lowest frequency possible in this range is 1 cycle/
-    %}
     power = abs(y).^2/n;  % power of the DFT
 
     figure(i);
