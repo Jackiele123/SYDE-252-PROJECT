@@ -1,0 +1,39 @@
+% global
+processed = 'newsounds';
+FS = 16000;
+N = 10;
+resampled_sounds = dir(fullfile(processed, '*.wav'));
+for i = 1:length(resampled_sounds)
+    filePath = fullfile(processed, resampled_sounds(i).name);
+    % Generate the filter banks
+    filterBanks = generateFilterBank(filePath, N, 100);
+    
+    % Extract the lowest and highest frequency channel outputs
+    lowestFreqOutput = filterBanks{1};
+    highestFreqOutput = filterBanks{end};
+    
+    % Create time vector for plotting
+    [nSamples, ~] = size(lowestFreqOutput);
+    t = (0:nSamples-1)/FS;
+    
+    % Plotting
+    figure;
+    
+    % Plotting the lowest frequency channel output
+    subplot(2, 1, 1);
+    plot(t, lowestFreqOutput);
+    title('Lowest Frequency Channel Output');
+    xlabel('Time (s)');
+    ylabel('Amplitude');
+    grid on;
+    
+    % Plotting the highest frequency channel output
+    subplot(2, 1, 2);
+    plot(t, highestFreqOutput);
+    title('Highest Frequency Channel Output');
+    xlabel('Time (s)');
+    ylabel('Amplitude');
+    grid on;
+end
+
+
