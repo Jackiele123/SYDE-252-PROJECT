@@ -20,8 +20,8 @@ for i = 1:3%length(resampled_sounds)
     figure;
     
     % Envelop Extraction
-    envelopelowestFreqOutput = envelopExtraction(5000, lowestFreqOutput);
-    envelopeHighestFreqOutput = envelopExtraction(5000, highestFreqOutput);
+    envelopelowestFreqOutput = envelopExtraction(100, lowestFreqOutput,500);
+    envelopeHighestFreqOutput = envelopExtraction(100, highestFreqOutput,500);
     
     % Plotting the lowest frequency channel output
     subplot(4, 1, 1);

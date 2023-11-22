@@ -1,4 +1,4 @@
-function [envelope] = envelopExtraction(filterOrder, inputData)
+function envelope = envelopExtraction(filterOrder, inputData, windowSize)
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
     
@@ -10,7 +10,7 @@ function [envelope] = envelopExtraction(filterOrder, inputData)
 
     rectifiedSignal = abs(inputData);
 
-    b = fir1(filterOrder, Wn, 'low', blackman(filterOrder+1));
+    b = fir1(filterOrder, Wn, 'low');
 
     filteredSignal = filter(b, 1, rectifiedSignal);
 
