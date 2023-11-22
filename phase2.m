@@ -1,22 +1,20 @@
 % global
-processed = 'newsounds';
-lowPassFilterOrder = 5000;
+processed = 'testsounds';
+lowPassFilterLength = 100;
 bandPassFilterOrder = 100;
-envelopeWindow = 500; % Window size envelope detection
-Fs = 16000; % Samlping Frequency
+Fs = 16000; % Sampling Frequency
 Fc = 400; % Low Pass cut-off frequency
-Wn = Fc/(Fs/2); %Normalizing Fc/Fs then x2 for nyquist frequency
 N = 10; % Number of Filter Banks
 resampled_sounds = dir(fullfile(processed, '*.wav'));
 
 lowFreq = 100; % Lower bound
 highFreq = 7999.99; % Nyquist frequency
 
-for i = 1:3 %length(resampled_sounds)
+for i = 1:length(resampled_sounds) %length(resampled_sounds)
     audioFilePath = fullfile(processed, resampled_sounds(i).name);
     % Generate the filter banks% Load the audio file
     [audioSignal, Fs] = audioread(audioFilePath);
-    
+    audioSignal = audioSignal(1:end,1);
 % Task 4 ------------------------------------------------    
     % Calculate the frequency edges for the filter banks
     freqEdges = linspace(lowFreq, highFreq, N+1);
@@ -52,7 +50,7 @@ for i = 1:3 %length(resampled_sounds)
     figure;
 
     % Plotting the lowest frequency channel output
-    subplot(4, 1, 1);
+    subplot(2, 1, 1);
     plot(t, lowestFreqOutput);
     title('Lowest Frequency Channel Output');
     xlabel('Time (s)');
@@ -60,7 +58,7 @@ for i = 1:3 %length(resampled_sounds)
     grid on;
 
     % Plotting the highest frequency channel output
-    subplot(4, 1, 3);
+    subplot(2, 1, 2);
     plot(t, highestFreqOutput);
     title('Highest Frequency Channel Output');
     xlabel('Time (s)');
@@ -68,37 +66,79 @@ for i = 1:3 %length(resampled_sounds)
     grid on;
  % Task 7/8 -------------------------------------------------------
     % Initialize envelope
-    envelope = zeros(size(filteredSignal));
-
-    for j = 1:N
-        % Rectify Signal
+    envelopes = cell(1,N);
+    % Initialize the fully processed signal
+    BPF_Rectifed_LPF_signal = cell(1,N);
+    for j = 1:length(filterBanks)
+        % % Rectify Signal
+        % rectifiedSignal = abs(filterBanks{j});
+        % % Lowpass Filter
+        % b = fir1(lowPassFilterOrder, Wn, 'low');
+        % 
+        % filteredSignal = filter(b, 1, rectifiedSignal);
+        % BPF_Rectifed_LPF_signal{j} = conv(rectifiedSignal,b,'same');
+        % envelope = zeros(size(filteredSignal));
+        % % Generate enevelope for each filter
+        % for k = 1:length(filteredSignal)
+        %     startIdx = max(1, k - floor(envelopeWindow / 2));
+        %     endIdx = min(length(filteredSignal), k + floor(envelopeWindow / 2));
+        %     envelope(k) = max(rectifiedSignal(startIdx:endIdx));
+        % end
+        % envelopes{j} = envelope;
+        % Design FIR filter coefficients using a window method
         rectifiedSignal = abs(filterBanks{j});
-        % Lowpass Filter
-        b = fir1(lowPassFilterOrder, Wn, 'low');
+        n = 0:lowPassFilterLength;
+        wc = 2 * pi * Fc / Fs;
+        idealResponse = wc/pi * sinc(wc/pi * (n - (lowPassFilterLength-1)/2));
     
-        filteredSignal = filter(b, 1, rectifiedSignal);
-        % Generate enevelope for each filter
-        startIdx = max(1, i - floor(envelopeWindow / 2));
-        endIdx = min(length(filteredSignal), i + floor(envelopeWindow / 2));
-        envelope(i) = mean(rectifiedSignal(startIdx:endIdx));
+        % Apply a Hamminh window to the coefficients
+        hammingWindow = 0.54 - 0.46 * cos(2 * pi * n / (lowPassFilterLength-1));
+        filterCoefficients = idealResponse .* hammingWindow;
+    
+        % Normalize coefficients so that the sum is 1
+        filterCoefficients = filterCoefficients / sum(filterCoefficients);
+
+        envelopes{j} = conv(rectifiedSignal, filterCoefficients, 'same');
     end
 
-    % Envelop Extraction
-    envelopelowestFreqOutput = envelope(1);
-    envelopeHighestFreqOutput = envelope(end);
+    % Envelope of lowest and highest
+    envelopelowestFreqOutput = envelopes{1};
+    envelopeHighestFreqOutput = envelopes{end};
     
-    subplot(4, 1, 2);
-    plot(t, envelopelowestFreqOutput);
-    title('Enveloped Lowest Frequency Channel Output');
+    figure;
+    % Plot for the envelope of lowest frequency channel
+    subplot(2, 2, 1);
+    plot(t, envelopelowestFreqOutput, 'r'); % Plot the envelope in red
+    title('Lowest Frequency Channel Envelope Output');
     xlabel('Time (s)');
     ylabel('Amplitude');
     grid on;
-
-    subplot(4, 1, 4);
-    plot(t, envelopeHighestFreqOutput);
-    title('Enveloped Highest Frequency Channel Output');
+    % Plot for zoomed in and overlapping envelope
+    subplot(2, 2, 2);
+    plot(t(1,10000:15000), lowestFreqOutput(100000:105000,1), 'b')
+    hold on;
+    plot(t(1,10000:15000), envelopelowestFreqOutput(100000:105000,1), 'r',LineWidth=1); % Plot the envelope in red
+    title('Zoomed in Lowest Frequency Channel Output and its Envelope');
+    xlabel('Time (s)');
+    ylabel('Amplitude');
+    legend('Rectified Signal', 'Envelope');
+    grid on;
+    
+    % Plot for the envelope of highest frequency channel
+    subplot(2, 2, 3);
+    plot(t, envelopeHighestFreqOutput, 'r'); % Plot the envelope in red
+    title('Highest Frequency Channel Envelope Output');
     xlabel('Time (s)');
     ylabel('Amplitude');
     grid on;
-
+    % Plot for zoomed in and overlapping envelope
+    subplot(2, 2, 4);
+    plot(t(1,10000:15000), highestFreqOutput(100000:105000,1), 'b')
+    hold on;
+    plot(t(1,10000:15000), envelopeHighestFreqOutput(100000:105000,1), 'r',LineWidth=1); % Plot the envelope in red
+    title('Zoomed in Highest Frequency Channel Output and its Envelope');
+    xlabel('Time (s)');
+    ylabel('Amplitude');
+    legend('Rectified Signal', 'Envelope');
+    grid on;
 end
