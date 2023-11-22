@@ -11,7 +11,8 @@ for i = 1:length(original_sounds)
 end
 
 % verified resampling by listening to new files
-filename = [processed, 'sample6.wav'];
+filename = [processed, '/sample6.wav'];
+disp(filename)
 [x, fs] = audioread(filename);
 disp(fs);
 sample_num = 1:length(x);
