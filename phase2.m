@@ -67,37 +67,23 @@ for i = 1:length(resampled_sounds) %length(resampled_sounds)
  % Task 7/8 -------------------------------------------------------
     % Initialize envelope
     envelopes = cell(1,N);
-    % Initialize the fully processed signal
-    BPF_Rectifed_LPF_signal = cell(1,N);
     for j = 1:length(filterBanks)
-        % % Rectify Signal
-        % rectifiedSignal = abs(filterBanks{j});
-        % % Lowpass Filter
-        % b = fir1(lowPassFilterOrder, Wn, 'low');
-        % 
-        % filteredSignal = filter(b, 1, rectifiedSignal);
-        % BPF_Rectifed_LPF_signal{j} = conv(rectifiedSignal,b,'same');
-        % envelope = zeros(size(filteredSignal));
-        % % Generate enevelope for each filter
-        % for k = 1:length(filteredSignal)
-        %     startIdx = max(1, k - floor(envelopeWindow / 2));
-        %     endIdx = min(length(filteredSignal), k + floor(envelopeWindow / 2));
-        %     envelope(k) = max(rectifiedSignal(startIdx:endIdx));
-        % end
-        % envelopes{j} = envelope;
-        % Design FIR filter coefficients using a window method
+
+        % Task 7  Recitify Signal by taking absolute value
         rectifiedSignal = abs(filterBanks{j});
         n = 0:lowPassFilterLength;
-        wc = 2 * pi * Fc / Fs;
+        wc = 2 * pi * Fc / Fs; % Normalized cut-off frequency
+        % FIR Low-pass filter design using sinc(x) = sin(pi*x)/(pi*x(
         idealResponse = wc/pi * sinc(wc/pi * (n - (lowPassFilterLength-1)/2));
     
-        % Apply a Hamminh window to the coefficients
+        % Apply a Hamming window to the coefficients
         hammingWindow = 0.54 - 0.46 * cos(2 * pi * n / (lowPassFilterLength-1));
         filterCoefficients = idealResponse .* hammingWindow;
     
         % Normalize coefficients so that the sum is 1
-        filterCoefficients = filterCoefficients / sum(filterCoefficients);
-
+        filterCoefficients = filterCoefficients / sum(filterCoefficients); 
+        
+        % Apply LPF to recitified signal
         envelopes{j} = conv(rectifiedSignal, filterCoefficients, 'same');
     end
 
