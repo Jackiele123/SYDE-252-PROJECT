@@ -4,7 +4,7 @@ function filterBankOutputs = generateFilterBank(audioFilePath, N, filterOrder)
 
     % Determine the frequency range of the audio signal
     lowFreq = 100; % Lower bound of human hearing
-    highFreq = 7999; % Nyquist frequency
+    highFreq = 7999.99; % Nyquist frequency
 
     % Calculate the frequency edges for the filter banks
     freqEdges = linspace(lowFreq, highFreq, N+1);

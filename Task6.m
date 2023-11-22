@@ -53,7 +53,6 @@ for i = 1:3%length(resampled_sounds)
     ylabel('Amplitude');
     grid on;
 
-
 end
 
 
