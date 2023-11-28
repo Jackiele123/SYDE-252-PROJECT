@@ -1,6 +1,6 @@
 % global
 processed = 'testsounds';
-lowPassFilterLength = 100;
+lowPassFilterOrder = 100;
 bandPassFilterOrder = 100;
 Fs = 16000; % Sampling Frequency
 Fc = 400; % Low Pass cut-off frequency
@@ -71,13 +71,13 @@ for i = 1:length(resampled_sounds) %length(resampled_sounds)
 
         % Task 7  Recitify Signal by taking absolute value
         rectifiedSignal = abs(filterBanks{j});
-        n = 0:lowPassFilterLength;
+        n = 0:lowPassFilterOrder;
         wc = 2 * pi * Fc / Fs; % Normalized cut-off frequency
         % FIR Low-pass filter design using sinc(x) = sin(pi*x)/(pi*x(
-        idealResponse = wc/pi * sinc(wc/pi * (n - (lowPassFilterLength-1)/2));
+        idealResponse = wc/pi * sinc(wc/pi * (n - (lowPassFilterOrder-1)/2));
     
         % Apply a Hamming window to the coefficients
-        hammingWindow = 0.54 - 0.46 * cos(2 * pi * n / (lowPassFilterLength-1));
+        hammingWindow = 0.54 - 0.46 * cos(2 * pi * n / (lowPassFilterOrder-1));
         filterCoefficients = idealResponse .* hammingWindow;
     
         % Normalize coefficients so that the sum is 1
