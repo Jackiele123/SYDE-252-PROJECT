@@ -1,14 +1,14 @@
 % global
 processed = 'testsounds';
 filtered = 'filteredsounds';
-lowPassFilterOrder = 5000;
+lowPassFilterOrder = 10000;
 bandPassFilterOrder = 5000;
 Fs = 16000; % Sampling Frequency
-Fc = 400; % Low Pass cut-off frequency
-N = 10; % Number of Filter Banks
+Fc = 500; % Low Pass cut-off frequency
+N = 15; % Number of Filter Banks
 resampled_sounds = dir(fullfile(processed, '*.wav'));
 
-lowFreq = 100; % Lower bound
+lowFreq = 100; % Lower bound 
 highFreq = 7999.99; % Nyquist frequency
 
 for i = 1:length(resampled_sounds) %length (resampled_sounds)
@@ -19,7 +19,7 @@ for i = 1:length(resampled_sounds) %length (resampled_sounds)
 % Task 4 ------------------------------------------------    
     % Calculate the frequency edges for the filter banks
     freqEdges = linspace(lowFreq, highFreq, N+1);
-
+    
     % Initialize filterBankOutputs
     filterBanks = cell(1, N);
     
@@ -57,8 +57,8 @@ for i = 1:length(resampled_sounds) %length (resampled_sounds)
         % Normalize coefficients so that the sum is 1
         filterCoefficients = filterCoefficients / sum(filterCoefficients); 
         
-        % Apply LPF to recitified signal
-        envelopes{j} = conv(rectifiedSignal, filterCoefficients, 'same');
+        % Apply LPF to rectified signal using the filter function
+        envelopes{j} = filter(filterCoefficients, 1, rectifiedSignal);
     end
 
 % ----------------------------PHASE 3-------------------------------------
@@ -83,7 +83,7 @@ for i = 1:length(resampled_sounds) %length (resampled_sounds)
     
     % Step 13: Play and Save the Output Sound
     % sound(normalizedSignal, Fs);
-    outputFilePath = [filtered,'\filtered_',num2str(N),'_',resampled_sounds(i).name];
+    outputFilePath = [filtered,'/C_',num2str(N),'_Fc_',num2str(Fc),'_LPO_',num2str(lowPassFilterOrder),'_BPO_',num2str(bandPassFilterOrder),resampled_sounds(i).name];
     audiowrite(outputFilePath, normalizedSignal, Fs);
 end
 
